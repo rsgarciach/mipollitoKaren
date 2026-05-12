@@ -398,7 +398,7 @@
 
     .arrow-btn:active { transform: scale(0.95); }
 
-    /* ✅ CONTADOR: siempre oculto por defecto */
+    /* CONTADOR: completamente oculto por defecto, sin transición inicial */
     .slide-counter {
       font-size: clamp(0.7rem, 1.8vw, 0.9rem);
       color: #fff;
@@ -406,14 +406,19 @@
       min-width: clamp(45px, 10vw, 70px);
       text-align: center;
       opacity: 0;
+      visibility: hidden;
       pointer-events: none;
-      transition: opacity 0.4s ease;
+      transition: none;
       flex-shrink: 0;
       text-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
 
-    /* ✅ Solo visible cuando está pausado */
-    .slide-counter.show { opacity: 0.8; }
+    /* Solo visible cuando está pausado */
+    .slide-counter.show {
+      opacity: 0.8;
+      visibility: visible;
+      transition: opacity 0.3s ease;
+    }
 
     #audioPlayer { display: none; }
 
@@ -612,7 +617,7 @@
       </div>
       <div class="slide">
         <div class="slide-content">
-          <img src="15.jpg" alt="Amor 17" loading="lazy">
+          <img src="15.JPG" alt="Amor 17" loading="lazy">
           <p>"Haces mi mundo más bonito, aunque no lo sepas."</p>
         </div>
       </div>
@@ -991,6 +996,11 @@
       stopAutoSlide();
       slideCounter.classList.remove('show');
       songTimer.classList.remove('show');
+    });
+
+    // Garantía extra: ocultar contador siempre que el audio esté reproduciéndose
+    audioPlayer.addEventListener('play', () => {
+      slideCounter.classList.remove('show');
     });
 
     audioPlayer.addEventListener('timeupdate', () => {
