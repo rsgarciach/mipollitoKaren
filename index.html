@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Mi pollito hermosa 🐣🥰</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      background: linear-gradient(135deg, #fd5e53, #ffb6b9 90%);
+      font-family: 'Segoe UI', 'Arial', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    /* Pantalla de inicio */
+    .start-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #fd5e53, #ffb6b9 90%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 1;
+      transition: opacity 0.8s ease-out;
+      padding: 20px;
+    }
+
+    .start-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .start-content {
+      text-align: center;
+      animation: fadeInUp 1s ease-out;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      max-width: 90vw;
+    }
+
+    .heart-emoji {
+      font-size: clamp(3rem, 12vw, 7rem);
+      animation: floatingHeart 3s ease-in-out infinite;
+    }
+
+    @keyframes floatingHeart {
+      0%, 100% {
+        transform: translateY(0px);
+        opacity: 1;
+      }
+      50% {
+        transform: translateY(-20px);
+        opacity: 0.8;
+      }
+    }
+
+    .start-text {
+      font-size: clamp(1.2rem, 5vw, 2rem);
+      color: white;
+      font-weight: 700;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      line-height: 1.4;
+      max-width: 95%;
+      word-wrap: break-word;
+    }
+
+    .drag-slider {
+      width: clamp(250px, 85vw, 420px);
+      height: 55px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      border-radius: 50px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      animation: slideUpButton 0.8s ease-out 0.3s both;
+      cursor: grab;
+    }
+
+    .drag-slider:active {
+      cursor: grabbing;
+    }
+
+    @keyframes slideUpButton {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .slider-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2));
+      transition: width 0.1s ease;
+      border-radius: 50px;
+    }
+
+    .slider-content {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 0 15px;
+      font-size: clamp(0.75rem, 2vw, 1rem);
+      font-weight: 600;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      gap: 10px;
+    }
+
+    .slider-text {
+      opacity: 1;
+      transition: opacity 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .egg-emoji {
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      animation: eggBounce 0.8s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes eggBounce {
+      0% {
+        transform: translateX(0);
+      }
+      50% {
+        transform: translateX(8px);
+      }
+      100% {
+        transform: translateX(0);
+      }
+    }
+
+    .slider-button {
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      background: white;
+      border-radius: 50%;
+      border: none;
+      cursor: grab;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      flex-shrink: 0;
+    }
+
+    .slider-button:active {
+      cursor: grabbing;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .slider-button.dragging {
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .slider-button.completed {
+      background: linear-gradient(135deg, #4caf50, #45a049);
+      box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+    }
+
+    /* Slideshow */
+    .slide-show {
+      background-image: url('fondo.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      border-radius: clamp(12px, 3vw, 24px);
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      max-width: 600px;
+      max-height: 85vh;
+      aspect-ratio: 9 / 12;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      gap: 0;
+    }
+
+    .slides-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .slide {
+      opacity: 0;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      transition: opacity 0.8s ease-in-out;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(15px, 3vw, 30px);
+      text-align: center;
+      top: 0;
+      left: 0;
+      overflow: hidden;
+    }
+
+    .slide.active {
+      opacity: 1;
+      z-index: 10;
+    }
+
+    .slide-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(10px, 2vw, 15px);
+      height: 100%;
+      width: 100%;
+    }
+
+    .slide img {
+      width: clamp(120px, 40vw, 300px);
+      height: clamp(120px, 40vw, 300px);
+      object-fit: cover;
+      border-radius: clamp(12px, 2vw, 16px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+      animation: slideInImage 0.6s ease-in-out;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    @keyframes slideInImage {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .slide p {
+      font-size: clamp(0.8rem, 2.2vw, 1.1rem);
+      color: #fff;
+      font-weight: 500;
+      line-height: 1.5;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+      max-width: 95%;
+      background: rgba(0, 0, 0, 0.2);
+      padding: clamp(8px, 1.5vw, 12px) clamp(12px, 2vw, 16px);
+      border-radius: clamp(10px, 1.5vw, 12px);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      word-wrap: break-word;
+      overflow-y: auto;
+      max-height: 20vh;
+    }
+
+    /* Botón "Mi pollito" */
+    .music-button {
+      position: absolute;
+      top: clamp(10px, 2vh, 20px);
+      right: clamp(10px, 2vh, 20px);
+      z-index: 30;
+      background: linear-gradient(135deg, #ff4066, #ee3a5c);
+      border: none;
+      border-radius: 50%;
+      width: clamp(45px, 10vw, 65px);
+      height: clamp(45px, 10vw, 65px);
+      min-width: 45px;
+      min-height: 45px;
+      font-size: clamp(0.6rem, 1.8vw, 0.85rem);
+      cursor: pointer;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(255, 0, 100, 0.3), 0 0 20px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-weight: 600;
+      text-align: center;
+      padding: 5px;
+      line-height: 1.1;
+      backdrop-filter: blur(10px);
+    }
+
+    .music-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(255, 0, 100, 0.4), 0 0 30px rgba(0, 0, 0, 0.3);
+      background: linear-gradient(135deg, #ff5578, #f04569);
+    }
+
+    .music-button:active {
+      transform: scale(0.95);
+    }
+
+    .music-button.playing {
+      animation: pulse 1.5s infinite;
+      background: linear-gradient(135deg, #ff6b86, #ff4066);
+    }
+
+    .music-button.paused {
+      animation: none;
+      opacity: 0.7;
+      background: linear-gradient(135deg, #ff4066, #ee3a5c);
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        box-shadow: 0 4px 12px rgba(255, 0, 100, 0.3), 0 0 0 0 rgba(255, 64, 102, 0.7), 0 0 20px rgba(0, 0, 0, 0.2);
+      }
+      50% {
+        box-shadow: 0 4px 12px rgba(255, 0, 100, 0.3), 0 0 0 10px rgba(255, 64, 102, 0), 0 0 20px rgba(0, 0, 0, 0.2);
+      }
+    }
+
+    .music-icon {
+      font-size: 1.4em;
+      margin-bottom: 2px;
+    }
+
+    .music-text {
+      font-size: 0.6em;
+      word-wrap: break-word;
+      max-width: 90%;
+    }
+
+    /* Info de tiempo de canción */
+    .song-timer {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      padding: clamp(12px, 2vw, 15px) clamp(20px, 3vw, 25px);
+      border-radius: clamp(10px, 1.5vw, 12px);
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
+      font-weight: 600;
+      z-index: 25;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .song-timer.show {
+      opacity: 1;
+    }
+
+    .nav-container {
+      position: absolute;
+      bottom: clamp(8px, 1.5vh, 15px);
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: clamp(15px, 3vw, 30px);
+      align-items: center;
+      padding: 0 clamp(10px, 2vw, 20px);
+      z-index: 20;
+    }
+
+    .arrow-btn {
+      background: rgba(253, 226, 228, 0.9);
+      border: none;
+      border-radius: 50%;
+      width: clamp(40px, 8vw, 50px);
+      height: clamp(40px, 8vw, 50px);
+      min-width: 40px;
+      min-height: 40px;
+      font-size: clamp(1.1rem, 2vw, 1.5rem);
+      cursor: pointer;
+      color: #ee3a5c;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .arrow-btn:hover {
+      background: rgba(250, 145, 173, 0.95);
+      color: #fff;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .arrow-btn:active {
+      transform: scale(0.95);
+    }
+
+    .slide-counter {
+      font-size: clamp(0.7rem, 1.8vw, 0.9rem);
+      color: #fff;
+      font-weight: 600;
+      min-width: clamp(45px, 10vw, 70px);
+      text-align: center;
+      background: rgba(0, 0, 0, 0.2);
+      padding: clamp(6px, 1vw, 10px) clamp(10px, 1.5vw, 14px);
+      border-radius: 8px;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      flex-shrink: 0;
+    }
+
+    /* Audio player (oculto) */
+    #audioPlayer {
+      display: none;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Optimizaciones para diferentes dispositivos */
+    @media (max-height: 600px) {
+      .slide p {
+        max-height: 15vh;
+        font-size: clamp(0.75rem, 2vw, 0.95rem);
+      }
+
+      .slide img {
+        width: clamp(100px, 35vw, 200px);
+        height: clamp(100px, 35vw, 200px);
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 0;
+      }
+
+      .slide-show {
+        border-radius: 16px;
+        max-width: 98vw;
+        max-height: 90vh;
+      }
+
+      .slide {
+        padding: clamp(12px, 2vw, 18px);
+      }
+
+      .start-screen {
+        padding: 15px;
+      }
+
+      .drag-slider {
+        margin-top: 10px;
+      }
+    }
+
+    /* Landscape mode adjustments */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .slide-show {
+        max-height: 95vh;
+      }
+
+      .slide img {
+        width: clamp(80px, 20vw, 150px);
+        height: clamp(80px, 20vw, 150px);
+      }
+
+      .slide p {
+        max-height: 12vh;
+        font-size: clamp(0.7rem, 1.8vw, 0.9rem);
+      }
+
+      .music-button {
+        width: clamp(40px, 8vh, 55px);
+        height: clamp(40px, 8vh, 55px);
+      }
+
+      .arrow-btn {
+        width: clamp(36px, 7vh, 45px);
+        height: clamp(36px, 7vh, 45px);
+      }
+    }
+
+    /* iPad/Tablet optimizations */
+    @media (min-width: 768px) and (max-width: 1024px) {
+      .slide-show {
+        max-width: 550px;
+        max-height: 80vh;
+      }
+
+      .slide img {
+        width: clamp(150px, 38vw, 280px);
+        height: clamp(150px, 38vw, 280px);
+      }
+
+      .slide p {
+        font-size: clamp(0.9rem, 2.3vw, 1.1rem);
+      }
+    }
+
+    /* Desktop optimizations */
+    @media (min-width: 1025px) {
+      .slide-show {
+        max-width: 600px;
+        max-height: 85vh;
+      }
+
+      .slide img {
+        width: clamp(180px, 45vw, 320px);
+        height: clamp(180px, 45vw, 320px);
+      }
+
+      .slide p {
+        font-size: clamp(1rem, 2.3vw, 1.2rem);
+      }
+
+      .arrow-btn:hover {
+        transform: scale(1.15);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Pantalla de inicio con drag slider -->
+  <div class="start-screen" id="startScreen">
+    <div class="start-content">
+      <div class="heart-emoji">💕</div>
+      <p class="start-text">Todo contigo mi vida 🐣🥰</p>
+      
+      <div class="drag-slider" id="dragSlider">
+        <div class="slider-fill" id="sliderFill"></div>
+        <div class="slider-content">
+          <span class="slider-text" id="sliderText">Arrastra para continuar</span>
+          <span class="egg-emoji">🐣</span>
+        </div>
+        <button class="slider-button" id="sliderButton"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slideshow principal -->
+  <div class="slide-show" id="slideshow">
+    <button class="music-button" id="musicBtn" title="Pausa/Reanuda la música">
+      <span class="music-icon">🐰</span>
+      <span class="music-text">Dale play Polli 🐣</span>
+    </button>
+
+    <div class="song-timer" id="songTimer"></div>
+
+    <div class="slides-container">
+      <div class="slide active">
+        <div class="slide-content">
+          <img src="1.jpg" alt="Amor 1" loading="lazy">
+          <p>"Te amo no solo por lo que eres, sino por lo que soy cuando estoy contigo."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="2.jpg" alt="Amor 2" loading="lazy">
+          <p>"Contigo mi amor, cada momento es mágico."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="3.jpg" alt="Amor 3" loading="lazy">
+          <p>"Pedí un deseo y llegaste tú mi pollito hermosa."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="4.33.jpg" alt="Amor 4" loading="lazy">
+          <p>"Cuando me imagino feliz, me imagino contigo amor mío."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="5.jpg" alt="Amor 5" loading="lazy">
+          <p>"Cada vez que veo tus ojos, encuentro una historia interminable."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="5.1.jpg" alt="Amor 6" loading="lazy">
+          <p>"Un solo beso tuyo despierta todas mis emociones."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="5.2.jpg" alt="Amor 7" loading="lazy">
+          <p>"Si tu corazón fuera un libro, leería cada página para ponerme a soñar."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="6.jpg" alt="Amor 8" loading="lazy">
+          <p>"Con tu amor ilumino cada parte de mi ser."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="7.jpg" alt="Amor 9" loading="lazy">
+          <p>"Eres mi presente más feliz y mi futuro más esperado."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="8.jpg" alt="Amor 10" loading="lazy">
+          <p>"Encontrarte en mis sueños es la coincidencia perfecta."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="9.jpg" alt="Amor 11" loading="lazy">
+          <p>"Cada momento contigo es un regalo del cielo."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="10.jpg" alt="Amor 12" loading="lazy">
+          <p>"Eres todas las coincidencias perfectas."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="11.jpg" alt="Amor 13" loading="lazy">
+          <p>"Que nuestro amor sea como un vino añejo, que se haga más profundo y valioso con el paso del tiempo."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="12.jpg" alt="Amor 14" loading="lazy">
+          <p>"En tus brazos encontré mi lugar en el mundo."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="13.jpg" alt="Amor 15" loading="lazy">
+          <p>"Llenas mi vida de colores."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="14.jpg" alt="Amor 16" loading="lazy">
+          <p>"Tengo esa costumbre de pensar en ti, cuando hablan de amor mi vida."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="15.jpg" alt="Amor 17" loading="lazy">
+          <p>"Haces mi mundo más bonito, aunque no lo sepas."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="15.1.jpg" alt="Amor 18" loading="lazy">
+          <p>"Somos una casualidad llena de intención."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="16.jpg" alt="Amor 19" loading="lazy">
+          <p>"Por más momentos juntos."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="17.jpg" alt="Amor 20" loading="lazy">
+          <p>"Cuanto más te veo, más me enamoro de ti preciosa."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="18.jpg" alt="Amor 21" loading="lazy">
+          <p>"Con todo mi amor, para toda la vida."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="19.jpg" alt="Amor 22" loading="lazy">
+          <p>"Te amo hasta los límites del universo."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="19.1.jpg" alt="Amor 23" loading="lazy">
+          <p>"Me amas incluso cuando soy difícil de amar. Y yo te amo porque es lo mejor que puedo hacer por ti."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="20.jpg" alt="Amor 24" loading="lazy">
+          <p>"Que la casualidad nos dure para siempre."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="21.jpg" alt="Amor 25" loading="lazy">
+          <p>"Los momentos a tu lado son únicos."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="22.jpg" alt="Amor 26" loading="lazy">
+          <p>"Gracias por dedicarte a hacernos felices."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="22.2.jpg" alt="Amor 27" loading="lazy">
+          <p>"Mi corazón te pertenece mi polli hermosa."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="23.jpg" alt="Amor 28" loading="lazy">
+          <p>"Te amo, así de simple, así de fuerte."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="24.jpg" alt="Amor 29" loading="lazy">
+          <p>"El camino será largo, pero valdrá la pena recorrerlo junto a ti."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="25.jpg" alt="Amor 30" loading="lazy">
+          <p>"Las personas se combinan, pero tú me complementas mi amor."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="26.jpg" alt="Amor 31" loading="lazy">
+          <p>"Hagamos un trato: tú, yo y toda la vida."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="27.jpg" alt="Amor 32" loading="lazy">
+          <p>"La vida está llena de cosas bonitas, por ejemplo, tú."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="28.jpg" alt="Amor 33" loading="lazy">
+          <p>"No te prometo perfección, pero sí un corazón lleno de amor y citas en el estadio U."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="29.jpg" alt="Amor 34" loading="lazy">
+          <p>"Tus ojos y tu sonrisa están como para perderse en ellos."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="30.jpg" alt="Amor 35" loading="lazy">
+          <p>"Eres una de esas formas que tiene la vida de decirme lo bonita que es."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="30.1.jpg" alt="Amor 36" loading="lazy">
+          <p>"Te amo tanto que mi corazón arde cuando te ve."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="31.jpg" alt="Amor 37" loading="lazy">
+          <p>"Llevo tu sonrisa en el alma."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="32.jpg" alt="Amor 38" loading="lazy">
+          <p>"Quiero hacer contigo lo que la primavera hace con los cerezos."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="32.1.jpg" alt="Amor 39" loading="lazy">
+          <p>"Dos vidas, un mundo juntos."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="32.2.jpg" alt="Amor 40" loading="lazy">
+          <p>"Y es que te amo tanto que no lo puedo ni explicar mi polli."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="33.jpg" alt="Amor 41" loading="lazy">
+          <p>"En tus brazos encontré uno de mis lugares favoritos, el otro son tus besos mi vida."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="34.jpg" alt="Amor 42" loading="lazy">
+          <p>"Fue fácil el que mis ojos te encontraran y difícil el que dejaran de mirarte."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="35.jpg" alt="Amor 43" loading="lazy">
+          <p>"Mi mayor adicción lleva tu nombre y tu hermoso cuerpo."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="36.jpg" alt="Amor 44" loading="lazy">
+          <p>"Eres la poesía de mis sentidos."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="37.jpg" alt="Amor 45" loading="lazy">
+          <p>"Hermosa llenas mi vida de colores."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="38.jpg" alt="Amor 46" loading="lazy">
+          <p>"Eres la luz que ilumina mis días grises mi peititi."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="39.jpg" alt="Amor 47" loading="lazy">
+          <p>"Prometo estar siempre para ti pase lo que pase, con cada beso que me das es una promesa de amor."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="40.jpg" alt="Amor 48" loading="lazy">
+          <p>"Descubrí en tus ojos un nuevo universo."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="41.jpg" alt="Amor 49" loading="lazy">
+          <p>"Eres la pieza que faltaba en mi rompecabezas."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="42.jpg" alt="Amor 50" loading="lazy">
+          <p>"Eres mi luz y mi paz en este mundo tan caótico."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="43.jpg" alt="Amor 51" loading="lazy">
+          <p>"Mis ganas de ti no se quitan, se acumulan mi peititi."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="44.jpg" alt="Amor 52" loading="lazy">
+          <p>"Mi sonrisa siempre se escapa hacia tus labios."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="45.jpg" alt="Amor 53" loading="lazy">
+          <p>"Cuando te veo, mi corazón hace big bang y nace un universo en mi corazón."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="46.jpg" alt="Amor 54" loading="lazy">
+          <p>"Te amo y te amaré hasta los confines del universo mi amor."</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <img src="47.jpg" alt="Amor 55" loading="lazy">
+          <p>"Contigo todo es mejor. Tú eres mi lugar favorito."</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-container">
+      <button class="arrow-btn" id="prevBtn">❮</button>
+      <span class="slide-counter"><span id="current">1</span>/<span id="total">55</span></span>
+      <button class="arrow-btn" id="nextBtn">❯</button>
+    </div>
+  </div>
+
+  <!-- Audio element with iOS compatibility -->
+  <audio id="audioPlayer" playsinline webkit-playsinline>
+    <source src="PocoaPocoYo.mp3" type="audio/mpeg">
+    Tu navegador no soporta el elemento de audio.
+  </audio>
+
+  <script>
+    // ============================================
+    // DRAG SLIDER FUNCTIONALITY
+    // ============================================
+    const dragSlider = document.getElementById('dragSlider');
+    const sliderButton = document.getElementById('sliderButton');
+    const sliderFill = document.getElementById('sliderFill');
+    const sliderText = document.getElementById('sliderText');
+    const startScreen = document.getElementById('startScreen');
+    
+    let isDragging = false;
+    let startX = 0;
+    const sliderThreshold = 0.8;
+
+    dragSlider.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startX = e.clientX;
+      sliderButton.classList.add('dragging');
+    });
+
+    dragSlider.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      startX = e.touches[0].clientX;
+      sliderButton.classList.add('dragging');
+    });
+
+    document.addEventListener('mousemove', handleDrag);
+    document.addEventListener('touchmove', handleDrag, { passive: false });
+
+    function handleDrag(e) {
+      if (!isDragging) return;
+
+      const currentX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+      const sliderRect = dragSlider.getBoundingClientRect();
+      const sliderWidth = sliderRect.width;
+      const buttonWidth = sliderButton.offsetWidth;
+      const maxMove = sliderWidth - buttonWidth - 16;
+
+      let moveX = currentX - sliderRect.left - buttonWidth / 2;
+      moveX = Math.max(0, Math.min(moveX, maxMove));
+
+      sliderButton.style.left = moveX + 8 + 'px';
+      
+      const progress = moveX / maxMove;
+      sliderFill.style.width = (progress * 100) + '%';
+
+      if (progress > 0.3) {
+        sliderText.textContent = 'Sigue, casi llegamos';
+      } else {
+        sliderText.textContent = 'Arrastra para continuar';
+      }
+
+      if (progress > 0.6) {
+        sliderText.textContent = '¡Casi allá!';
+      }
+
+      if (progress >= sliderThreshold) {
+        completeSlider();
+      }
+    }
+
+    document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchend', stopDrag);
+
+    function stopDrag() {
+      if (!isDragging) return;
+      isDragging = false;
+      sliderButton.classList.remove('dragging');
+
+      const buttonLeft = parseFloat(sliderButton.style.left) || 8;
+      const sliderWidth = dragSlider.offsetWidth;
+      const buttonWidth = sliderButton.offsetWidth;
+      const maxMove = sliderWidth - buttonWidth - 16;
+      const progress = (buttonLeft - 8) / maxMove;
+
+      if (progress < sliderThreshold) {
+        sliderButton.style.transition = 'all 0.3s ease';
+        sliderButton.style.left = '8px';
+        sliderFill.style.transition = 'width 0.3s ease';
+        sliderFill.style.width = '0%';
+        sliderText.textContent = 'Arrastra para continuar';
+        
+        setTimeout(() => {
+          sliderButton.style.transition = '';
+          sliderFill.style.transition = '';
+        }, 300);
+      }
+    }
+
+    function completeSlider() {
+      isDragging = false;
+      sliderButton.classList.add('completed');
+      sliderButton.classList.remove('dragging');
+      sliderText.textContent = '¡Lo hiciste!';
+      
+      setTimeout(() => {
+        startScreen.classList.add('hidden');
+        playMusicIOS();
+        startAutoSlide();
+      }, 600);
+    }
+
+    // ============================================
+    // SLIDESHOW FUNCTIONALITY
+    // ============================================
+    const SLIDE_DURATION = 3500;
+    const TRANSITION_TIME = 800;
+    const audioPlayer = document.getElementById('audioPlayer');
+    const musicBtn = document.getElementById('musicBtn');
+    const songTimer = document.getElementById('songTimer');
+    let isPlaying = false;
+    let songDuration = 0;
+    let slideInterval;
+    let isPaused = false;
+
+    // Función para reproducir música en iOS
+    function playMusicIOS() {
+      const playPromise = audioPlayer.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          isPlaying = true;
+          musicBtn.classList.add('playing');
+          musicBtn.classList.remove('paused');
+          console.log('🎵 Música reproduciendo automáticamente');
+        }).catch(error => {
+          console.log('⚠️ Autoplay bloqueado en iOS. El usuario debe hacer clic en el botón.');
+          // En iPhone, iOS bloquea la autoplay. El usuario puede hacer clic en el botón
+          isPlaying = false;
+          musicBtn.classList.remove('playing');
+          musicBtn.classList.add('paused');
+        });
+      }
+    }
+
+    audioPlayer.addEventListener('loadedmetadata', () => {
+      songDuration = audioPlayer.duration;
+      console.log('Duración de canción:', songDuration.toFixed(2), 'segundos');
+    });
+
+    musicBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      
+      if (isPlaying) {
+        audioPlayer.pause();
+        musicBtn.classList.remove('playing');
+        musicBtn.classList.add('paused');
+        isPlaying = false;
+        isPaused = true;
+        clearInterval(slideInterval);
+        songTimer.classList.remove('show');
+      } else {
+        audioPlayer.play().catch(err => {
+          console.error('Error reproduciendo música:', err);
+        });
+        musicBtn.classList.add('playing');
+        musicBtn.classList.remove('paused');
+        isPlaying = true;
+        isPaused = false;
+        startAutoSlide();
+      }
+    });
+
+    audioPlayer.addEventListener('ended', () => {
+      musicBtn.classList.remove('playing');
+      isPlaying = false;
+      songTimer.classList.remove('show');
+    });
+
+    audioPlayer.addEventListener('timeupdate', () => {
+      if (isPlaying && songDuration > 0) {
+        const remaining = Math.ceil(audioPlayer.duration - audioPlayer.currentTime);
+        const minutes = Math.floor(remaining / 60);
+        const seconds = remaining % 60;
+        songTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        songTimer.classList.add('show');
+      }
+    });
+
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    let currentIndex = 0;
+
+    const totalDuration = totalSlides * SLIDE_DURATION;
+    console.log('Duración total de presentación:', (totalDuration / 1000).toFixed(2), 'segundos');
+    console.log('Cantidad de imágenes:', totalSlides);
+
+    function adjustAudioSpeed() {
+      if (!audioPlayer.src || !songDuration) return;
+      const requiredSpeed = totalDuration / (songDuration * 1000);
+      const speed = Math.max(0.5, Math.min(2, requiredSpeed));
+      audioPlayer.playbackRate = speed;
+      console.log(`Velocidad de audio ajustada: ${speed.toFixed(2)}x (Presentación: ${(totalDuration / 1000).toFixed(0)}s, Canción: ${songDuration.toFixed(0)}s)`);
+    }
+
+    audioPlayer.addEventListener('loadedmetadata', adjustAudioSpeed);
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+      });
+      document.getElementById('current').textContent = index + 1;
+    }
+
+    function nextSlide() {
+      currentIndex = (currentIndex + 1) % totalSlides;
+      showSlide(currentIndex);
+    }
+
+    function prevSlide() {
+      currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+      showSlide(currentIndex);
+    }
+
+    function startAutoSlide() {
+      slideInterval = setInterval(nextSlide, SLIDE_DURATION);
+    }
+
+    function resetInterval() {
+      clearInterval(slideInterval);
+      startAutoSlide();
+    }
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      nextSlide();
+      resetInterval();
+    });
+
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      prevSlide();
+      resetInterval();
+    });
+
+    let swipeStartX = null;
+    const slideshowEl = document.getElementById('slideshow');
+
+    slideshowEl.addEventListener('touchstart', e => {
+      swipeStartX = e.changedTouches[0].clientX;
+    });
+
+    slideshowEl.addEventListener('touchend', e => {
+      if (swipeStartX === null) return;
+      const endX = e.changedTouches[0].clientX;
+      if (endX - swipeStartX > 40) prevSlide();
+      else if (swipeStartX - endX > 40) nextSlide();
+      resetInterval();
+      swipeStartX = null;
+    });
+
+    // Initialize
+    document.getElementById('total').textContent = totalSlides;
+
+    console.log('=== SINCRONIZACIÓN DE AUDIO ===');
+    console.log('Duración por imagen:', SLIDE_DURATION + 'ms');
+    console.log('Tiempo de transición:', TRANSITION_TIME + 'ms');
+    console.log('Total de imágenes:', totalSlides);
+  </script>
+</body>
+</html>
