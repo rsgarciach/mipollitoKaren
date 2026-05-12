@@ -457,20 +457,22 @@
       transform: scale(0.95);
     }
 
+    /* ✅ CONTADOR - OCULTO POR DEFECTO (LÍNEA 571-590) */
     .slide-counter {
       font-size: clamp(0.7rem, 1.8vw, 0.9rem);
       color: #fff;
       font-weight: 600;
       min-width: clamp(45px, 10vw, 70px);
       text-align: center;
-      opacity: 0;
+      opacity: 0;  /* ✅ SIEMPRE OCULTO POR DEFECTO */
+      pointer-events: none;
       transition: opacity 0.5s ease;
       flex-shrink: 0;
       text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
 
     .slide-counter.show {
-      opacity: 0.8;
+      opacity: 0.8;  /* ✅ SOLO VISIBLE CUANDO TIENE CLASE .show */
     }
 
     /* Audio player (oculto) */
@@ -1181,7 +1183,7 @@
           musicBtn.classList.add('playing');
           musicBtn.classList.remove('paused');
           console.log('🎵 Música reproduciendo automáticamente');
-          slideCounter.classList.add('show');
+          // ✅ NO MOSTRAR CONTADOR AL REPRODUCIR INICIALMENTE (LÍNEA 1084)
           startAutoSlide();
         }).catch(error => {
           console.log('⚠️ Autoplay bloqueado en iOS. El usuario debe hacer clic en el botón.');
@@ -1197,20 +1199,23 @@
       console.log('Duración de canción:', songDuration.toFixed(2), 'segundos');
     });
 
+    // ✅ EVENTO CLICK DEL BOTÓN - CAMBIOS EN LÍNEAS 1100-1123
     musicBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       
       if (isPlaying) {
+        // ✅ PAUSAR - MOSTRAR CONTADOR
         audioPlayer.pause();
         musicBtn.classList.remove('playing');
         musicBtn.classList.add('paused');
         isPlaying = false;
         isPaused = true;
         stopAutoSlide();
-        slideCounter.classList.remove('show');
+        slideCounter.classList.add('show'); // ✅ MOSTRAR CONTADOR CUANDO PAUSA (LÍNEA 1114)
         songTimer.classList.remove('show');
-        console.log('⏸️ Música pausada, imágenes pausadas');
+        console.log('⏸️ Música pausada, imágenes pausadas, contador visible');
       } else {
+        // ✅ REANUDAR - MOSTRAR CONTADOR BREVEMENTE Y LUEGO OCULTAR
         audioPlayer.play().catch(err => {
           console.error('Error reproduciendo música:', err);
         });
@@ -1218,9 +1223,15 @@
         musicBtn.classList.remove('paused');
         isPlaying = true;
         isPaused = false;
+        
+        // ✅ MOSTRAR CONTADOR POR 1.5 SEGUNDOS AL REANUDAR (LÍNEAS 1123-1128)
         slideCounter.classList.add('show');
+        setTimeout(() => {
+          slideCounter.classList.remove('show');
+        }, 1500);
+        
         startAutoSlide();
-        console.log('▶️ Música reanudada, imágenes reanudadas');
+        console.log('▶️ Música reanudada, imágenes reanudadas, contador visible 1.5s');
       }
     });
 
@@ -1228,7 +1239,7 @@
       musicBtn.classList.remove('playing');
       isPlaying = false;
       stopAutoSlide();
-      slideCounter.classList.remove('show');
+      slideCounter.classList.remove('show'); // ✅ OCULTAR CONTADOR AL TERMINAR (LÍNEA 1135)
       songTimer.classList.remove('show');
     });
 
