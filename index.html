@@ -398,27 +398,7 @@
 
     .arrow-btn:active { transform: scale(0.95); }
 
-    /* CONTADOR: completamente oculto por defecto, sin transición inicial */
-    .slide-counter {
-      font-size: clamp(0.7rem, 1.8vw, 0.9rem);
-      color: #fff;
-      font-weight: 600;
-      min-width: clamp(45px, 10vw, 70px);
-      text-align: center;
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transition: none;
-      flex-shrink: 0;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
-
-    /* Solo visible cuando está pausado */
-    .slide-counter.show {
-      opacity: 0.8;
-      visibility: visible;
-      transition: opacity 0.3s ease;
-    }
+    /* Contador eliminado */
 
     #audioPlayer { display: none; }
 
@@ -853,7 +833,7 @@
 
     <div class="nav-container">
       <button class="arrow-btn" id="prevBtn">❮</button>
-      <span class="slide-counter" id="slideCounter"><span id="current">1</span>/<span id="total">55</span></span>
+      
       <button class="arrow-btn" id="nextBtn">❯</button>
     </div>
   </div>
@@ -935,11 +915,11 @@
     // ============================================
     // SLIDESHOW
     // ============================================
-    const SLIDE_DURATION = 3500;
+    let SLIDE_DURATION = 3500; // Se recalcula cuando carga el audio
     const audioPlayer = document.getElementById('audioPlayer');
     const musicBtn = document.getElementById('musicBtn');
     const songTimer = document.getElementById('songTimer');
-    const slideCounter = document.getElementById('slideCounter');
+    
     let isPlaying = false;
     let songDuration = 0;
     let slideInterval;
@@ -976,7 +956,7 @@
         isPlaying = false;
         isPaused = true;
         stopAutoSlide();
-        slideCounter.classList.add('show');    // ✅ Visible al pausar
+        
         songTimer.classList.remove('show');
       } else {
         // REANUDAR → ocultar contador
@@ -985,7 +965,7 @@
         musicBtn.classList.remove('paused');
         isPlaying = true;
         isPaused = false;
-        slideCounter.classList.remove('show'); // ✅ Oculto al reanudar
+        
         startAutoSlide();
       }
     });
@@ -994,13 +974,13 @@
       musicBtn.classList.remove('playing');
       isPlaying = false;
       stopAutoSlide();
-      slideCounter.classList.remove('show');
+      
       songTimer.classList.remove('show');
     });
 
     // Garantía extra: ocultar contador siempre que el audio esté reproduciéndose
     audioPlayer.addEventListener('play', () => {
-      slideCounter.classList.remove('show');
+      
     });
 
     audioPlayer.addEventListener('timeupdate', () => {
@@ -1019,9 +999,15 @@
 
     function adjustAudioSpeed() {
       if (!audioPlayer.src || !songDuration) return;
-      const totalDuration = totalSlides * SLIDE_DURATION;
-      const speed = Math.max(0.5, Math.min(2, totalDuration / (songDuration * 1000)));
-      audioPlayer.playbackRate = speed;
+      // Calcular duración por slide para que todas las imágenes se muestren durante la canción
+      SLIDE_DURATION = Math.floor((songDuration * 1000) / totalSlides);
+      SLIDE_DURATION = Math.max(2000, Math.min(8000, SLIDE_DURATION)); // entre 2s y 8s por slide
+      audioPlayer.playbackRate = 1; // velocidad normal, el tiempo se ajusta por slide
+      // Reiniciar intervalo con nuevo tiempo si ya está corriendo
+      if (slideInterval) {
+        stopAutoSlide();
+        startAutoSlide();
+      }
     }
 
     function showSlide(index) {
