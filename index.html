@@ -852,13 +852,12 @@
     const sliderFill = document.getElementById('sliderFill');
     const sliderText = document.getElementById('sliderText');
     const startScreen = document.getElementById('startScreen');
-    
+
     let isDragging = false;
-    let startX = 0;
     const sliderThreshold = 0.8;
 
-    dragSlider.addEventListener('mousedown', (e) => { isDragging = true; startX = e.clientX; sliderButton.classList.add('dragging'); });
-    dragSlider.addEventListener('touchstart', (e) => { isDragging = true; startX = e.touches[0].clientX; sliderButton.classList.add('dragging'); });
+    dragSlider.addEventListener('mousedown', (e) => { isDragging = true; sliderButton.classList.add('dragging'); });
+    dragSlider.addEventListener('touchstart', (e) => { isDragging = true; sliderButton.classList.add('dragging'); });
 
     document.addEventListener('mousemove', handleDrag);
     document.addEventListener('touchmove', handleDrag, { passive: false });
@@ -867,9 +866,8 @@
       if (!isDragging) return;
       const currentX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
       const sliderRect = dragSlider.getBoundingClientRect();
-      const sliderWidth = sliderRect.width;
       const buttonWidth = sliderButton.offsetWidth;
-      const maxMove = sliderWidth - buttonWidth - 16;
+      const maxMove = sliderRect.width - buttonWidth - 16;
       let moveX = currentX - sliderRect.left - buttonWidth / 2;
       moveX = Math.max(0, Math.min(moveX, maxMove));
       sliderButton.style.left = moveX + 8 + 'px';
@@ -908,123 +906,63 @@
       sliderText.textContent = '¡Lo hiciste!';
       setTimeout(() => {
         startScreen.classList.add('hidden');
-        playMusicIOS();
+        iniciarReproduccion();
       }, 600);
     }
 
     // ============================================
     // SLIDESHOW
     // ============================================
-    let SLIDE_DURATION = 3500; // Se recalcula cuando carga el audio
     const audioPlayer = document.getElementById('audioPlayer');
-    const musicBtn = document.getElementById('musicBtn');
-    const songTimer = document.getElementById('songTimer');
-    
-    let isPlaying = false;
-    let songDuration = 0;
-    let slideInterval;
-    let isPaused = false;
+    const musicBtn   = document.getElementById('musicBtn');
+    const songTimer  = document.getElementById('songTimer');
 
-    function playMusicIOS() {
-      audioPlayer.play().then(() => {
-        isPlaying = true;
-        musicBtn.classList.add('playing');
-        musicBtn.classList.remove('paused');
-        startAutoSlide();
-      }).catch(() => {
-        isPlaying = false;
-        musicBtn.classList.remove('playing');
-        musicBtn.classList.add('paused');
-      });
-    }
-
-    audioPlayer.addEventListener('loadedmetadata', () => {
-      songDuration = audioPlayer.duration;
-      adjustAudioSpeed();
-    });
-
-    // ✅ LÓGICA DEL CONTADOR:
-    // - Al PAUSAR: se muestra el contador (permanece visible mientras esté pausado)
-    // - Al REANUDAR: se oculta el contador inmediatamente
-    musicBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (isPlaying) {
-        // PAUSAR → mostrar contador
-        audioPlayer.pause();
-        musicBtn.classList.remove('playing');
-        musicBtn.classList.add('paused');
-        isPlaying = false;
-        isPaused = true;
-        stopAutoSlide();
-        
-        songTimer.classList.remove('show');
-      } else {
-        // REANUDAR → ocultar contador
-        audioPlayer.play().catch(err => console.error(err));
-        musicBtn.classList.add('playing');
-        musicBtn.classList.remove('paused');
-        isPlaying = true;
-        isPaused = false;
-        
-        startAutoSlide();
-      }
-    });
-
-    audioPlayer.addEventListener('ended', () => {
-      musicBtn.classList.remove('playing');
-      isPlaying = false;
-      stopAutoSlide();
-      
-      songTimer.classList.remove('show');
-    });
-
-    // Garantía extra: ocultar contador siempre que el audio esté reproduciéndose
-    audioPlayer.addEventListener('play', () => {
-      
-    });
-
-    audioPlayer.addEventListener('timeupdate', () => {
-      if (isPlaying && songDuration > 0) {
-        const remaining = Math.ceil(audioPlayer.duration - audioPlayer.currentTime);
-        const minutes = Math.floor(remaining / 60);
-        const seconds = remaining % 60;
-        songTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        songTimer.classList.add('show');
-      }
-    });
-
-    const slides = document.querySelectorAll('.slide');
+    const slides      = document.querySelectorAll('.slide');
     const totalSlides = slides.length;
-    let currentIndex = 0;
+    let currentIndex  = 0;
+    let slideInterval = null;
+    let isPlaying     = false;
+    let isPaused      = false;
+    let slideDuration = 3500; // ms por slide, se recalcula al cargar el audio
 
-    function adjustAudioSpeed() {
-      if (!audioPlayer.src || !songDuration) return;
-      // Calcular duración por slide para que todas las imágenes se muestren durante la canción
-      SLIDE_DURATION = Math.floor((songDuration * 1000) / totalSlides);
-      SLIDE_DURATION = Math.max(2000, Math.min(8000, SLIDE_DURATION)); // entre 2s y 8s por slide
-      audioPlayer.playbackRate = 1; // velocidad normal, el tiempo se ajusta por slide
-      // Reiniciar intervalo con nuevo tiempo si ya está corriendo
+    // Calcula el tiempo por slide en función de la duración real de la canción
+    function calcularTiempoSlide() {
+      if (!audioPlayer.duration || isNaN(audioPlayer.duration)) return;
+      slideDuration = Math.floor((audioPlayer.duration * 1000) / totalSlides);
+      slideDuration = Math.max(1500, slideDuration); // mínimo 1.5s por seguridad
+      // Si el intervalo ya está corriendo, reiniciarlo con el nuevo tiempo
       if (slideInterval) {
         stopAutoSlide();
         startAutoSlide();
       }
     }
 
+    audioPlayer.addEventListener('loadedmetadata', calcularTiempoSlide);
+    // Fallback: algunos navegadores móviles disparan canplay pero no loadedmetadata
+    audioPlayer.addEventListener('canplay', calcularTiempoSlide);
+
     function showSlide(index) {
-      slides.forEach((slide, i) => slide.classList.toggle('active', i === index));
-      document.getElementById('current').textContent = index + 1;
+      slides.forEach((s, i) => s.classList.toggle('active', i === index));
     }
 
-    function nextSlide() { currentIndex = (currentIndex + 1) % totalSlides; showSlide(currentIndex); }
-    function prevSlide() { currentIndex = (currentIndex - 1 + totalSlides) % totalSlides; showSlide(currentIndex); }
+    function nextSlide() {
+      currentIndex = (currentIndex + 1) % totalSlides;
+      showSlide(currentIndex);
+    }
+
+    function prevSlide() {
+      currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+      showSlide(currentIndex);
+    }
 
     function startAutoSlide() {
       if (slideInterval) return;
-      slideInterval = setInterval(nextSlide, SLIDE_DURATION);
+      slideInterval = setInterval(nextSlide, slideDuration);
     }
 
     function stopAutoSlide() {
-      if (slideInterval) { clearInterval(slideInterval); slideInterval = null; }
+      clearInterval(slideInterval);
+      slideInterval = null;
     }
 
     function resetInterval() {
@@ -1032,23 +970,78 @@
       if (isPlaying && !isPaused) startAutoSlide();
     }
 
+    // Intenta reproducir automáticamente al abrir (funciona en Android; iOS requiere tap)
+    function iniciarReproduccion() {
+      audioPlayer.play().then(() => {
+        isPlaying = true;
+        isPaused  = false;
+        musicBtn.classList.add('playing');
+        musicBtn.classList.remove('paused');
+        startAutoSlide();
+      }).catch(() => {
+        // iOS bloqueó el autoplay — el usuario deberá presionar el botón
+        isPlaying = false;
+        musicBtn.classList.remove('playing');
+        musicBtn.classList.add('paused');
+      });
+    }
+
+    // Botón pausa / reanuda
+    musicBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (isPlaying) {
+        audioPlayer.pause();
+        musicBtn.classList.remove('playing');
+        musicBtn.classList.add('paused');
+        isPlaying = false;
+        isPaused  = true;
+        stopAutoSlide();
+        songTimer.classList.remove('show');
+      } else {
+        audioPlayer.play().catch(err => console.error(err));
+        musicBtn.classList.add('playing');
+        musicBtn.classList.remove('paused');
+        isPlaying = true;
+        isPaused  = false;
+        startAutoSlide();
+      }
+    });
+
+    // Temporizador de canción (solo muestra tiempo restante, sin contador de slides)
+    audioPlayer.addEventListener('timeupdate', () => {
+      if (isPlaying && audioPlayer.duration) {
+        const remaining = Math.ceil(audioPlayer.duration - audioPlayer.currentTime);
+        const m = Math.floor(remaining / 60);
+        const s = remaining % 60;
+        songTimer.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+        songTimer.classList.add('show');
+      }
+    });
+
+    audioPlayer.addEventListener('ended', () => {
+      isPlaying = false;
+      musicBtn.classList.remove('playing');
+      stopAutoSlide();
+      songTimer.classList.remove('show');
+    });
+
+    // Flechas de navegación manual
     document.getElementById('nextBtn').addEventListener('click', () => { nextSlide(); resetInterval(); });
     document.getElementById('prevBtn').addEventListener('click', () => { prevSlide(); resetInterval(); });
 
+    // Swipe táctil
     let swipeStartX = null;
-    const slideshowEl = document.getElementById('slideshow');
-    slideshowEl.addEventListener('touchstart', e => { swipeStartX = e.changedTouches[0].clientX; });
-    slideshowEl.addEventListener('touchend', e => {
+    document.getElementById('slideshow').addEventListener('touchstart', e => {
+      swipeStartX = e.changedTouches[0].clientX;
+    });
+    document.getElementById('slideshow').addEventListener('touchend', e => {
       if (swipeStartX === null) return;
-      const endX = e.changedTouches[0].clientX;
-      if (endX - swipeStartX > 40) prevSlide();
-      else if (swipeStartX - endX > 40) nextSlide();
+      const diff = e.changedTouches[0].clientX - swipeStartX;
+      if (diff > 40) prevSlide();
+      else if (diff < -40) nextSlide();
       resetInterval();
       swipeStartX = null;
     });
-
-    document.getElementById('total').textContent = totalSlides;
   </script>
 </body>
 </html>
-
